@@ -24,7 +24,7 @@ async function startServer() {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `Act as an expert e-commerce copywriter and SEO specialist for a luxury artificial plant brand called "Verdant Lux". Target audience: busy professionals, interior stylists, and pet owners.
+        contents: `Act as an expert e-commerce copywriter and SEO specialist for a luxury artificial plant brand called "Plantiqa". Target audience: busy professionals, interior stylists, and pet owners.
 Tone: Elegant, reassuring, inspiring.
 Generate high-converting homepage hero headline, key bullet points, and SEO meta description for: ${prompt}`,
       });
@@ -34,6 +34,17 @@ Generate high-converting homepage hero headline, key bullet points, and SEO meta
       console.error('Gemini API error:', err);
       res.status(500).json({ error: 'Failed to generate copy.', details: err.message });
     }
+  });
+
+  // Explicit endpoints for SEO Crawlers
+  app.get(['/robots.txt', '/robot.txt'], (req, res) => {
+    const robotsPath = path.join(process.cwd(), 'public', 'robots.txt');
+    res.type('text/plain').sendFile(robotsPath);
+  });
+
+  app.get('/sitemap.xml', (req, res) => {
+    const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+    res.type('application/xml').sendFile(sitemapPath);
   });
 
   // Vite dev middleware vs production static
@@ -52,7 +63,7 @@ Generate high-converting homepage hero headline, key bullet points, and SEO meta
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Verdant Lux E-Commerce server running on http://0.0.0.0:${PORT}`);
+    console.log(`Plantiqa E-Commerce server running on http://0.0.0.0:${PORT}`);
   });
 }
 

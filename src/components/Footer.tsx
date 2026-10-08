@@ -195,7 +195,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Copyright */}
         <div className="pt-6 border-t border-[#3D5542] text-center text-xs text-gray-300 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Plantiqa Artificial Plants for Home. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-gray-300">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
             <button onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
               Privacy Policy
             </button>
@@ -207,6 +207,24 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <button onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
               Support
             </button>
+            <span>•</span>
+            <a 
+              href="/sitemap.xml" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-emerald-300 transition-colors cursor-pointer"
+            >
+              Sitemap.xml
+            </a>
+            <span>•</span>
+            <a 
+              href="/robots.txt" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-emerald-300 transition-colors cursor-pointer"
+            >
+              Robots.txt
+            </a>
           </div>
         </div>
 

@@ -1,0 +1,11 @@
+# Plantiqa - Ultra-Realistic Artificial Plants for Home
+# Website: plantiqa.vercel.app
+
+User-agent: *
+Allow: /
+
+# Directives
+Host: https://plantiqa.vercel.app
+
+# Sitemap
+Sitemap: https://plantiqa.vercel.app/sitemap.xml
