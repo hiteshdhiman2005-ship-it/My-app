@@ -47,6 +47,12 @@ Generate high-converting homepage hero headline, key bullet points, and SEO meta
     res.type('application/xml').sendFile(sitemapPath);
   });
 
+  // Google Search Console verification file
+  app.get(['/googlec3ec9c70865c6e25.html', '/googlec3ec9c70865c6e25%20(1).html'], (req, res) => {
+    const filePath = path.join(process.cwd(), 'public', 'googlec3ec9c70865c6e25.html');
+    res.type('text/html').sendFile(filePath);
+  });
+
   // Vite dev middleware vs production static
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
