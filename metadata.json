@@ -1,0 +1,6 @@
+{
+  "name": "Plantiqa - Artificial Plants for Home",
+  "description": "Shop Plantiqa for ultra-realistic artificial plants. Enjoy zero watering, 100% pet-friendly foliage, and handcrafted luxury trees with free express shipping.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
