@@ -676,7 +676,7 @@ ${TESTIMONIALS_COPY.map(t => `#### ${t.author} (${t.role})\nHeadline: ${t.headli
                     <ul className="space-y-1.5 text-gray-600 text-[11px]">
                       <li className="flex items-start gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        <span><strong>Secondary Keywords:</strong> Dedicated filter chips for <em>small artificial plants for bathroom shelves</em>, <em>fake plants for dark rooms</em>, and <em>fake office plants that look real</em>.</span>
+                        <span><strong>Natural Space Integration:</strong> Dedicated space curation & editorial spotlights for <em>bathroom shelves</em>, <em>dark rooms</em>, <em>office workspaces</em>, and <em>living room corners</em> without keyword stuffing.</span>
                       </li>
                       <li className="flex items-start gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />

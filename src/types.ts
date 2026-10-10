@@ -20,6 +20,8 @@ export interface Product {
   isBestSeller?: boolean;
   isPetSafe: boolean;
   badge?: string;
+  spaces?: ('living-room' | 'bathroom' | 'office' | 'dark-rooms' | 'pet-safe')[];
+  idealRooms?: string[];
 }
 
 export interface Category {

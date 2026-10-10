@@ -1,31 +1,104 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PRODUCTS } from '../data/products';
 import { Product, PageType } from '../types';
-import { Search, Filter, ShoppingBag, Eye, Star, ShieldCheck, Check, Sparkles, Wrench, BookOpen, HelpCircle, ArrowRight } from 'lucide-react';
+import { Search, ShoppingBag, Eye, Star, ShieldCheck, Check, Sparkles, Wrench, BookOpen, HelpCircle, ArrowRight, X } from 'lucide-react';
 import { ZoomImage } from '../components/ZoomImage';
 
 interface ProductsPageProps {
   onAddToCart: (product: Product) => void;
   onOpenQuickView: (product: Product) => void;
-  onNavigate?: (page: PageType) => void;
+  onNavigate?: (page: PageType, options?: { space?: string; category?: string }) => void;
   onOpenQuiz?: () => void;
+  initialSpace?: string;
+  initialCategory?: string;
 }
+
+interface SpaceMeta {
+  id: string;
+  label: string;
+  icon: string;
+  title: string;
+  description: string;
+  highlights: string[];
+}
+
+const SPACES: SpaceMeta[] = [
+  {
+    id: 'all',
+    label: 'All Spaces',
+    icon: '🌿',
+    title: 'Complete Botanical Collection',
+    description: 'Explore our full collection of Real-Touch™ artificial plants, luxury floor trees, and architectural indoor stands handcrafted to look completely real.',
+    highlights: ['✨ Real-Touch™ Tactile Realism', '🚚 Free Express Shipping Over ₹1,499', '🛡️ 30-Day Risk-Free Trial']
+  },
+  {
+    id: 'bathroom',
+    label: 'Bathroom Shelves & Moisture',
+    icon: '🛁',
+    title: 'Small Artificial Plants for Bathroom Shelves & Humid Spaces',
+    description: 'Transform powder rooms, shower ledges, and vanity shelves into serene spa sanctuaries. Engineered with moisture-impervious Real-Touch™ polymers that withstand steam and damp air without molding, shedding, or needing natural light.',
+    highlights: ['💧 100% Steam & Moisture Resistant', '🌿 Compact Profiles Crafted for Floating Shelves', '☀️ Thrives in Zero-Window Powder Rooms']
+  },
+  {
+    id: 'living-room',
+    label: 'Living Room Corners',
+    icon: '🛋️',
+    title: 'Tall Artificial Trees & Stands for Living Room Corners',
+    description: 'Sculptural floor trees and elevating hardwood pedestals crafted to naturally anchor seating areas, open alcoves, and tall ceilings. Built with authentic timber trunks and hand-curved branches that cast organic leaf shadows.',
+    highlights: ['🌳 Organic Timber Hardwood Trunks', '📐 Proportioned for 8ft to 12ft Ceilings', '⚖️ Pre-Weighted Anti-Topple Stone Pots']
+  },
+  {
+    id: 'office',
+    label: 'Executive Desks & Office',
+    icon: '💼',
+    title: 'Fake Office Plants That Look Real for Desks & Workspaces',
+    description: 'Calming tabletop succulents and biophilic greenery in Italian marble and ceramic planters. Engineered to reduce screen fatigue, enhance focus, and elevate workstations with zero watering, soil dirt, or weekend maintenance.',
+    highlights: ['🔬 Biophilic Focus & Stress Reduction', '🚫 Zero Water, Gnats, or Soil Allergen Risks', '🏛️ Solid Italian Marble & Stoneware Planters']
+  },
+  {
+    id: 'dark-rooms',
+    label: 'Dark Rooms & Windowless Spaces',
+    icon: '🌑',
+    title: 'Fake Plants for Dark Rooms & Low-Light Spaces',
+    description: 'Hyper-realistic botanical arrangements that stay permanently lush where biological houseplants perish. Specially crafted for basement suites, interior corridors, and dim reading nooks with zero natural window exposure.',
+    highlights: ['🌑 100% Zero-Light Tolerant', '✨ UV-Stable Non-Fading Silk Leaves', '🌱 Never Drops Leaves or Needs Misting']
+  },
+  {
+    id: 'pet-safe',
+    label: 'Pet-Friendly Homes',
+    icon: '🐾',
+    title: 'Pet-Safe Artificial Plants for Cats & Dogs',
+    description: 'Certified 100% non-toxic, hypoallergenic botanicals made from inert food-grade polymers. Eliminate the danger of toxic sap, gastrointestinal distress, and calcium oxalate crystals found in living indoor foliage.',
+    highlights: ['🐾 Certified 100% Non-Toxic to Cats & Dogs', '🐕 Heavy Tip-Proof Bases', '🌱 Zero Mud or Fertilizers Tracked on Rugs']
+  }
+];
 
 export const ProductsPage: React.FC<ProductsPageProps> = ({
   onAddToCart,
   onOpenQuickView,
   onNavigate,
   onOpenQuiz,
+  initialSpace = 'all',
+  initialCategory = 'all'
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedSpace, setSelectedSpace] = useState<string>(initialSpace);
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured');
   const [petSafeOnly, setPetSafeOnly] = useState<boolean>(false);
   const [bestSellersOnly, setBestSellersOnly] = useState<boolean>(false);
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (initialSpace) setSelectedSpace(initialSpace);
+  }, [initialSpace]);
+
+  useEffect(() => {
+    if (initialCategory) setSelectedCategory(initialCategory);
+  }, [initialCategory]);
+
   const categories = [
-    { id: 'all', label: 'All Products' },
+    { id: 'all', label: 'All Categories' },
     { id: 'statement', label: 'Floor Trees' },
     { id: 'stands', label: 'Plant Stands' },
     { id: 'succulents', label: 'Desk & Succulents' },
@@ -33,12 +106,26 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
     { id: 'accent', label: 'Medium Plants' },
   ];
 
+  const currentSpaceMeta = useMemo(() => {
+    return SPACES.find((s) => s.id === selectedSpace) || SPACES[0];
+  }, [selectedSpace]);
+
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((product) => {
+      // Space filter
+      if (selectedSpace !== 'all') {
+        if (selectedSpace === 'pet-safe') {
+          if (!product.isPetSafe) return false;
+        } else if (!product.spaces?.includes(selectedSpace as any)) {
+          return false;
+        }
+      }
+
       // Category match
       if (selectedCategory !== 'all' && product.category !== selectedCategory) {
         return false;
       }
+
       // Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -46,11 +133,14 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
         const matchesDesc = product.description.toLowerCase().includes(query);
         const matchesCat = product.categoryLabel.toLowerCase().includes(query);
         const matchesFeat = product.features.some(f => f.toLowerCase().includes(query));
-        if (!matchesName && !matchesDesc && !matchesCat && !matchesFeat) return false;
+        const matchesRoom = product.idealRooms?.some(r => r.toLowerCase().includes(query));
+        if (!matchesName && !matchesDesc && !matchesCat && !matchesFeat && !matchesRoom) return false;
       }
-      // Pet safe filter
+
+      // Pet safe filter toggle
       if (petSafeOnly && !product.isPetSafe) return false;
-      // Best seller filter
+
+      // Best seller filter toggle
       if (bestSellersOnly && !product.isBestSeller) return false;
 
       return true;
@@ -60,7 +150,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
       if (sortBy === 'rating') return b.rating - a.rating;
       return 0; // featured default
     });
-  }, [selectedCategory, searchQuery, sortBy, petSafeOnly, bestSellersOnly]);
+  }, [selectedSpace, selectedCategory, searchQuery, sortBy, petSafeOnly, bestSellersOnly]);
 
   const handleAdd = (product: Product) => {
     onAddToCart(product);
@@ -68,19 +158,28 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
     setTimeout(() => setAddedProductId(null), 1800);
   };
 
+  const handleResetFilters = () => {
+    setSelectedSpace('all');
+    setSelectedCategory('all');
+    setSearchQuery('');
+    setPetSafeOnly(false);
+    setBestSellersOnly(false);
+  };
+
   return (
     <div className="bg-[#FAF8F5] min-h-screen pb-24">
       {/* Catalog Hero Banner */}
-      <section className="bg-[#2F4232] text-white py-14 px-4 sm:px-6 lg:px-8 border-b border-[#4A6B50]">
+      <section className="bg-[#2F4232] text-white py-12 px-4 sm:px-6 lg:px-8 border-b border-[#4A6B50]">
         <div className="max-w-7xl mx-auto text-center space-y-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-emerald-300 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50">
-            Real-Touch™ Plant Catalog
+          <span className="text-xs font-bold uppercase tracking-widest text-emerald-300 bg-emerald-950/80 px-3.5 py-1.5 rounded-full border border-emerald-800/50 inline-flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+            Handcrafted Botanical Catalog
           </span>
-          <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-[#FAF8F5]">
-            Our Plant Collection
+          <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-[#FAF8F5]">
+            Ultra-Realistic Artificial Plants for Home
           </h1>
           <p className="text-sm sm:text-base text-[#D8E8DA] max-w-2xl mx-auto leading-relaxed">
-            Lifelike artificial plants and trees handcrafted to look real. Non-toxic, easy to clean, and backed by our 30-Day Easy Returns.
+            Thoughtfully curated greenery for living room corners, bathroom shelves, and workspaces. Handcrafted with Real-Touch™ foliage and zero watering required.
           </p>
         </div>
       </section>
@@ -88,17 +187,56 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
       {/* Main Catalog Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
-        {/* Controls Bar: Search, Sorting, and Filters */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-[#EAE5DC] mb-8 space-y-4">
+        {/* Controls Bar: Spaces, Categories, Search, and Filters */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-[#EAE5DC] mb-8 space-y-5">
           
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          {/* Room & Space Navigation Filter */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#2C3B2E] uppercase tracking-wider flex items-center gap-1.5">
+                <span>Shop by Space & Need</span>
+              </span>
+              {selectedSpace !== 'all' && (
+                <button
+                  onClick={() => setSelectedSpace('all')}
+                  className="text-xs text-gray-500 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Show all spaces</span>
+                </button>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              {SPACES.map((space) => {
+                const isActive = selectedSpace === space.id;
+                return (
+                  <button
+                    key={space.id}
+                    onClick={() => setSelectedSpace(space.id)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border ${
+                      isActive
+                        ? 'bg-[#2C3B2E] text-white border-[#2C3B2E] shadow-sm font-semibold'
+                        : 'bg-[#FAF8F5] text-gray-700 hover:bg-[#EAE5DC] border-[#EAE5DC]'
+                    }`}
+                  >
+                    <span>{space.icon}</span>
+                    <span>{space.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Search, Sort, & Toggles */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center pt-3 border-t border-gray-100">
             
             {/* Search Input */}
             <div className="md:col-span-6 relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search catalog or keywords (e.g. best plant stand for indoors, Fiddle Leaf, Monstera)..."
+                placeholder="Search plants, rooms, or features (e.g. bathroom shelves, olive tree, desk)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-[#FAF8F5] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C3B2E] focus:border-transparent text-[#1C281E]"
@@ -115,7 +253,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
 
             {/* Sort Selector */}
             <div className="md:col-span-3 flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Sort By:</span>
+              <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Sort:</span>
               <select
                 value={sortBy}
                 onChange={(e: any) => setSortBy(e.target.value)}
@@ -153,77 +291,76 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
 
           </div>
 
-          {/* Category Tabs & Popular Secondary Keyword Searches */}
-          <div className="space-y-3 pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedCategory === cat.id
-                      ? 'bg-[#2C3B2E] text-white shadow-xs'
-                      : 'bg-[#FAF8F5] text-[#3D4A3E] hover:bg-[#EAE5DC]'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Secondary Keyword Quick Search Chips */}
-            <div className="pt-2 flex flex-wrap items-center gap-2 text-xs border-t border-gray-100/60">
-              <span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Secondary Keyword Searches:</span>
-              {[
-                { label: 'Small artificial plants for bathroom shelves', query: 'bathroom shelves' },
-                { label: 'Fake plants for dark rooms', query: 'dark rooms' },
-                { label: 'Fake office plants that look real', query: 'office' }
-              ].map((chip) => (
-                <button
-                  key={chip.label}
-                  onClick={() => {
-                    setSearchQuery(chip.query);
-                    setSelectedCategory('all');
-                  }}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all cursor-pointer border ${
-                    searchQuery === chip.query
-                      ? 'bg-[#2C3B2E] text-white border-[#1E2B20]'
-                      : 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
-                  }`}
-                  title={`Filter products for: ${chip.label}`}
-                >
-                  ✨ {chip.label}
-                </button>
-              ))}
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-[11px] font-semibold text-gray-500 hover:text-gray-800 underline ml-1 cursor-pointer"
-                >
-                  Reset Filter
-                </button>
-              )}
-            </div>
+          {/* Plant Type Category Tabs */}
+          <div className="pt-2 border-t border-gray-100 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mr-1 shrink-0">Type:</span>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                  selectedCategory === cat.id
+                    ? 'bg-[#2C3B2E] text-white'
+                    : 'bg-[#FAF8F5] text-gray-600 hover:bg-[#EAE5DC]'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
 
         </div>
+
+        {/* Dedicated Space Editorial Banner (Shows when a specific space or room is chosen) */}
+        {selectedSpace !== 'all' && (
+          <div className="bg-gradient-to-br from-[#2F4232] to-[#1E2B20] text-white p-6 sm:p-7 rounded-2xl shadow-sm border border-[#4A6B50] mb-8 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
+                  <span>{currentSpaceMeta.icon}</span>
+                  <span className="uppercase tracking-wider">Dedicated Space Curation</span>
+                </div>
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white">
+                  {currentSpaceMeta.title}
+                </h2>
+              </div>
+              <button
+                onClick={() => setSelectedSpace('all')}
+                className="self-start sm:self-auto px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-xs font-medium rounded-full text-white transition-colors cursor-pointer"
+              >
+                Clear Space Filter
+              </button>
+            </div>
+            
+            <p className="text-xs sm:text-sm text-[#D8E8DA] max-w-3xl leading-relaxed">
+              {currentSpaceMeta.description}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-white/10 text-xs text-emerald-200">
+              {currentSpaceMeta.highlights.map((item, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[11px] font-medium"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Results Info */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-xs text-[#5C6E5E]">
             Showing <strong className="text-[#1C281E]">{filteredProducts.length}</strong> botanicals
+            {selectedSpace !== 'all' && <span> for <strong>{currentSpaceMeta.label}</strong></span>}
           </p>
-          {(selectedCategory !== 'all' || searchQuery || petSafeOnly || bestSellersOnly) && (
+          {(selectedSpace !== 'all' || selectedCategory !== 'all' || searchQuery || petSafeOnly || bestSellersOnly) && (
             <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSearchQuery('');
-                setPetSafeOnly(false);
-                setBestSellersOnly(false);
-              }}
+              onClick={handleResetFilters}
               className="text-xs font-semibold text-[#2C3B2E] underline hover:text-emerald-800 cursor-pointer"
             >
-              Reset Filters
+              Reset All Filters
             </button>
           )}
         </div>
@@ -232,14 +369,9 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
         {filteredProducts.length === 0 ? (
           <div className="bg-white p-12 text-center rounded-2xl border border-[#EAE5DC] space-y-4">
             <p className="text-base font-semibold text-gray-700">No botanicals matched your current filter criteria.</p>
-            <p className="text-xs text-gray-500">Try adjusting your search keywords or turning off specific toggles.</p>
+            <p className="text-xs text-gray-500">Try choosing a different room space or clearing the category filter.</p>
             <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSearchQuery('');
-                setPetSafeOnly(false);
-                setBestSellersOnly(false);
-              }}
+              onClick={handleResetFilters}
               className="px-5 py-2.5 bg-[#2C3B2E] text-white text-xs font-semibold rounded-full hover:bg-[#1E2B20] transition-colors cursor-pointer"
             >
               Show All Botanicals
@@ -305,6 +437,20 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                         <span className="font-bold text-gray-800">{product.rating}</span>
                         <span className="text-gray-400 text-[11px]">({product.reviewCount})</span>
                       </div>
+
+                      {/* Space & Ideal Room Tags */}
+                      {product.idealRooms && product.idealRooms.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2.5">
+                          {product.idealRooms.slice(0, 2).map((room, rIdx) => (
+                            <span
+                              key={rIdx}
+                              className="text-[10px] font-medium bg-[#FAF8F5] text-[#3D4A3E] px-2 py-0.5 rounded-md border border-[#EAE5DC]"
+                            >
+                              📍 {room}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       <p className="text-xs text-gray-600 line-clamp-2 mt-2 leading-relaxed">
                         {product.description}
@@ -377,7 +523,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
               </button>
             </div>
 
-            {/* Link to Blog / Quiz */}
+            {/* Link to Blog */}
             <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs hover:border-[#2C3B2E] transition-all space-y-3 flex flex-col justify-between">
               <div className="space-y-2">
                 <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
@@ -385,7 +531,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                 </div>
                 <h4 className="font-serif text-lg font-bold text-[#1C281E]">Plant Styling & Care Guides</h4>
                 <p className="text-xs text-[#5C6E5E] leading-relaxed">
-                  Learn branch shaping techniques, leaf cleaning tips, and pet-safe botanical arrangement ideas in our journal.
+                  Learn branch shaping techniques, bathroom moisture styling, and pet-safe botanical arrangement ideas in our journal.
                 </p>
               </div>
               <button
@@ -405,7 +551,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                 </div>
                 <h4 className="font-serif text-lg font-bold text-[#1C281E]">Have Questions Before Buying?</h4>
                 <p className="text-xs text-[#5C6E5E] leading-relaxed">
-                  Our plant experts are available 7 days a week to answer questions regarding leaf textures, planters, and shipping.
+                  Our plant experts are available 7 days a week to answer questions regarding leaf textures, planters, and room placement.
                 </p>
               </div>
               <button

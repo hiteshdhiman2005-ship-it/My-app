@@ -14,12 +14,21 @@ import { Product, CartItem, PageType } from './types';
 
 export default function App() {
   const [activePage, setActivePage] = useState<PageType>('home');
+  const [catalogSpace, setCatalogSpace] = useState<string>('all');
+  const [catalogCategory, setCatalogCategory] = useState<string>('all');
   const [cart, setCart] = useState<CartItem[]>([
     { product: PRODUCTS[0], quantity: 1 } // Default 1 item so cart drawer starts with sample item
   ]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
+  const handleNavigate = (page: PageType, options?: { space?: string; category?: string }) => {
+    if (options?.space !== undefined) setCatalogSpace(options.space);
+    if (options?.category !== undefined) setCatalogCategory(options.category);
+    setActivePage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleAddToCart = (product: Product) => {
     setCart((prev) => {
@@ -60,7 +69,7 @@ export default function App() {
       {/* Navigation Header */}
       <Header
         activePage={activePage}
-        onNavigate={(page) => setActivePage(page)}
+        onNavigate={(page) => handleNavigate(page)}
         cartCount={cart.reduce((a, b) => a + b.quantity, 0)}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenQuiz={() => setIsQuizOpen(true)}
@@ -70,7 +79,7 @@ export default function App() {
       <main className="flex-1">
         {activePage === 'home' && (
           <HomePage
-            onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onNavigate={handleNavigate}
             onAddToCart={handleAddToCart}
             onOpenQuickView={(prod) => setQuickViewProduct(prod)}
             onOpenQuiz={() => setIsQuizOpen(true)}
@@ -79,22 +88,24 @@ export default function App() {
 
         {activePage === 'products' && (
           <ProductsPage
-            onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onNavigate={handleNavigate}
             onAddToCart={handleAddToCart}
             onOpenQuickView={(prod) => setQuickViewProduct(prod)}
             onOpenQuiz={() => setIsQuizOpen(true)}
+            initialSpace={catalogSpace}
+            initialCategory={catalogCategory}
           />
         )}
 
         {activePage === 'services' && (
           <ServicesPage
-            onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onNavigate={handleNavigate}
           />
         )}
 
         {activePage === 'blog' && (
           <BlogPage
-            onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onNavigate={handleNavigate}
             onAddToCart={handleAddToCart}
             onOpenQuickView={(prod) => setQuickViewProduct(prod)}
           />
@@ -102,13 +113,13 @@ export default function App() {
 
         {activePage === 'contact' && (
           <ContactPage
-            onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onNavigate={handleNavigate}
           />
         )}
       </main>
 
       {/* Footer */}
-      <Footer onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+      <Footer onNavigate={handleNavigate} />
 
       {/* Global Modals & Drawers */}
       <PlantQuizModal

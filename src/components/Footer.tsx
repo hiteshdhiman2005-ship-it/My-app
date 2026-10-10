@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Truck, RotateCcw, Heart, Send, Check, Leaf } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, Check, Leaf } from 'lucide-react';
 import { PageType } from '../types';
 
 interface FooterProps {
-  onNavigate: (page: PageType) => void;
+  onNavigate: (page: PageType, options?: { space?: string; category?: string }) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
@@ -17,8 +17,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
     }
   };
 
-  const navTo = (page: PageType) => {
-    onNavigate(page);
+  const navTo = (page: PageType, options?: { space?: string; category?: string }) => {
+    onNavigate(page, options);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -111,23 +111,23 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="font-bold text-emerald-300 uppercase tracking-wider">Featured Collections</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <button onClick={() => navTo('products')} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => navTo('products', { category: 'statement' })} className="hover:text-white transition-colors cursor-pointer">
                   Statement Floor Trees
                 </button>
               </li>
               <li>
-                <button onClick={() => navTo('products')} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => navTo('products', { category: 'succulents' })} className="hover:text-white transition-colors cursor-pointer">
                   Desktop & Shelf Succulents
                 </button>
               </li>
               <li>
-                <button onClick={() => navTo('products')} className="hover:text-white transition-colors cursor-pointer">
+                <button onClick={() => navTo('products', { category: 'vines' })} className="hover:text-white transition-colors cursor-pointer">
                   Cascading Hanging Vines
                 </button>
               </li>
               <li>
-                <button onClick={() => navTo('products')} className="hover:text-white transition-colors cursor-pointer">
-                  Architectural Ceramic Planters
+                <button onClick={() => navTo('products', { category: 'stands' })} className="hover:text-white transition-colors cursor-pointer">
+                  Architectural Plant Stands
                 </button>
               </li>
             </ul>
@@ -143,7 +143,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             {subscribed ? (
               <div className="p-3 bg-[#3D5542] rounded-xl border border-emerald-400/50 text-xs text-emerald-200 flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-300 shrink-0" />
-                <span>Thank you! Check your inbox for code <strong>VERDANT10</strong>.</span>
+                <span>Thank you! Check your inbox for code <strong>PLANTIQA10</strong>.</span>
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex gap-2">
@@ -167,32 +167,86 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         </div>
 
-        {/* Secondary SEO Keywords Tag Cloud */}
-        <div className="pt-8 border-t border-[#3D5542] space-y-3">
-          <h4 className="font-serif font-bold text-xs uppercase tracking-wider text-emerald-300">
-            Popular Secondary Plant Searches
-          </h4>
-          <div className="flex flex-wrap gap-2 text-xs">
-            {[
-              { label: 'Small artificial plants for bathroom shelves', target: 'products' },
-              { label: 'Fake plants for dark rooms', target: 'products' },
-              { label: 'Fake office plants that look real', target: 'products' },
-              { label: 'Pet-safe artificial plants for cats', target: 'products' },
-              { label: 'Non-toxic fake plants for dogs', target: 'products' },
-              { label: 'Tall artificial trees for living room corners', target: 'products' }
-            ].map((kw) => (
-              <button
-                key={kw.label}
-                onClick={() => navTo(kw.target as PageType)}
-                className="px-3 py-1 bg-[#3D5542] hover:bg-[#4A6B50] text-emerald-200 hover:text-white rounded-full text-[11px] transition-colors border border-[#5D8264] cursor-pointer"
-              >
-                🌿 {kw.label}
-              </button>
-            ))}
+        {/* Curated Space Solutions & Styling Guides */}
+        <div className="pt-8 border-t border-[#3D5542] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h4 className="font-serif font-bold text-sm text-emerald-300">
+              Curated Spaces & Botanical Home Solutions
+            </h4>
+            <span className="text-[11px] text-gray-300">
+              Handcrafted for rooms where living houseplants struggle
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+            <button
+              onClick={() => navTo('products', { space: 'living-room' })}
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
+                <span>🛋️</span>
+                <span>Living Room Corners</span>
+              </div>
+              <p className="text-[11px] text-gray-300 leading-snug">
+                Tall statement trees & stands proportioned to fill empty corners.
+              </p>
+            </button>
+
+            <button
+              onClick={() => navTo('products', { space: 'bathroom' })}
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
+                <span>🛁</span>
+                <span>Bathroom Shelves</span>
+              </div>
+              <p className="text-[11px] text-gray-300 leading-snug">
+                Steam-resistant cascading vines & compact shelf succulents.
+              </p>
+            </button>
+
+            <button
+              onClick={() => navTo('products', { space: 'office' })}
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
+                <span>💼</span>
+                <span>Workspaces & Desks</span>
+              </div>
+              <p className="text-[11px] text-gray-300 leading-snug">
+                Biophilic tabletop greenery that looks completely real on desks.
+              </p>
+            </button>
+
+            <button
+              onClick={() => navTo('products', { space: 'dark-rooms' })}
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
+                <span>🌑</span>
+                <span>Dark & Low-Light Rooms</span>
+              </div>
+              <p className="text-[11px] text-gray-300 leading-snug">
+                Zero-light tolerant greenery for basement suites and dim corridors.
+              </p>
+            </button>
+
+            <button
+              onClick={() => navTo('products', { space: 'pet-safe' })}
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
+                <span>🐾</span>
+                <span>Pet-Friendly Living</span>
+              </div>
+              <p className="text-[11px] text-gray-300 leading-snug">
+                Certified 100% non-toxic foliage safe for curious cats and dogs.
+              </p>
+            </button>
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* Copyright & SEO Links */}
         <div className="pt-6 border-t border-[#3D5542] text-center text-xs text-gray-300 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Plantiqa Artificial Plants for Home. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
