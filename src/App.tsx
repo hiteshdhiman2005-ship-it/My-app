@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -11,23 +11,57 @@ import { PlantQuizModal } from './components/PlantQuizModal';
 import { QuickViewModal } from './components/QuickViewModal';
 import { PRODUCTS } from './data/products';
 import { Product, CartItem, PageType } from './types';
+import { RouterProvider, useRouter, Link } from './context/RouterContext';
+import { Leaf, ArrowRight, ShoppingBag } from 'lucide-react';
 
-export default function App() {
-  const [activePage, setActivePage] = useState<PageType>('home');
-  const [catalogSpace, setCatalogSpace] = useState<string>('all');
-  const [catalogCategory, setCatalogCategory] = useState<string>('all');
+function AppContent() {
+  const {
+    page,
+    productId,
+    product: routeProduct,
+    blogSlug,
+    spaceFilter,
+    categoryFilter,
+    navigate,
+  } = useRouter();
+
   const [cart, setCart] = useState<CartItem[]>([
     { product: PRODUCTS[0], quantity: 1 } // Default 1 item so cart drawer starts with sample item
   ]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [modalProduct, setModalProduct] = useState<Product | null>(null);
 
-  const handleNavigate = (page: PageType, options?: { space?: string; category?: string }) => {
-    if (options?.space !== undefined) setCatalogSpace(options.space);
-    if (options?.category !== undefined) setCatalogCategory(options.category);
-    setActivePage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Sync route product to modal when direct URL like /products/prod-1 is loaded
+  useEffect(() => {
+    if (productId && routeProduct) {
+      setModalProduct(routeProduct);
+    } else if (!productId) {
+      setModalProduct(null);
+    }
+  }, [productId, routeProduct]);
+
+  const handleNavigate = (
+    targetPage: PageType | string,
+    options?: { space?: string; category?: string; productId?: string; blogSlug?: string }
+  ) => {
+    navigate(targetPage, options);
+  };
+
+  const handleOpenProduct = (prod: Product) => {
+    setModalProduct(prod);
+    navigate(`/products/${prod.id}`, { scrollToTop: false });
+  };
+
+  const handleCloseProduct = () => {
+    setModalProduct(null);
+    if (productId) {
+      const params = new URLSearchParams();
+      if (spaceFilter) params.set('space', spaceFilter);
+      if (categoryFilter) params.set('category', categoryFilter);
+      const qs = params.toString();
+      navigate(qs ? `/products?${qs}` : '/products', { replace: true, scrollToTop: false });
+    }
   };
 
   const handleAddToCart = (product: Product) => {
@@ -45,11 +79,11 @@ export default function App() {
     setIsCartOpen(true);
   };
 
-  const handleUpdateCartQty = (productId: string, delta: number) => {
+  const handleUpdateCartQty = (prodId: string, delta: number) => {
     setCart((prev) =>
       prev
         .map((item) => {
-          if (item.product.id === productId) {
+          if (item.product.id === prodId) {
             const newQty = item.quantity + delta;
             return newQty > 0 ? { ...item, quantity: newQty } : null;
           }
@@ -59,66 +93,98 @@ export default function App() {
     );
   };
 
-  const handleRemoveCartItem = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+  const handleRemoveCartItem = (prodId: string) => {
+    setCart((prev) => prev.filter((item) => item.product.id !== prodId));
   };
+
+  const activeHeaderPage: PageType = page === 'not-found' ? 'home' : page;
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#1C281E] font-sans antialiased selection:bg-[#2C3B2E] selection:text-white flex flex-col justify-between">
       
-      {/* Navigation Header */}
+      {/* Navigation Header with Real URLs */}
       <Header
-        activePage={activePage}
-        onNavigate={(page) => handleNavigate(page)}
+        activePage={activeHeaderPage}
+        onNavigate={(p) => handleNavigate(p)}
         cartCount={cart.reduce((a, b) => a + b.quantity, 0)}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenQuiz={() => setIsQuizOpen(true)}
       />
 
-      {/* Main Page View Content */}
+      {/* Main Page Content */}
       <main className="flex-1">
-        {activePage === 'home' && (
+        {page === 'home' && (
           <HomePage
             onNavigate={handleNavigate}
             onAddToCart={handleAddToCart}
-            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
+            onOpenQuickView={handleOpenProduct}
             onOpenQuiz={() => setIsQuizOpen(true)}
           />
         )}
 
-        {activePage === 'products' && (
+        {page === 'products' && (
           <ProductsPage
             onNavigate={handleNavigate}
             onAddToCart={handleAddToCart}
-            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
+            onOpenQuickView={handleOpenProduct}
             onOpenQuiz={() => setIsQuizOpen(true)}
-            initialSpace={catalogSpace}
-            initialCategory={catalogCategory}
+            initialSpace={spaceFilter || 'all'}
+            initialCategory={categoryFilter || 'all'}
           />
         )}
 
-        {activePage === 'services' && (
+        {page === 'services' && (
           <ServicesPage
             onNavigate={handleNavigate}
           />
         )}
 
-        {activePage === 'blog' && (
+        {page === 'blog' && (
           <BlogPage
             onNavigate={handleNavigate}
             onAddToCart={handleAddToCart}
-            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
+            onOpenQuickView={handleOpenProduct}
+            initialSlug={blogSlug}
           />
         )}
 
-        {activePage === 'contact' && (
+        {page === 'contact' && (
           <ContactPage
             onNavigate={handleNavigate}
           />
         )}
+
+        {page === 'not-found' && (
+          <div className="min-h-[60vh] flex items-center justify-center px-4 py-16">
+            <div className="bg-white p-8 sm:p-12 rounded-3xl border border-[#EAE5DC] shadow-md max-w-lg text-center space-y-5">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-[#2C3B2E] mx-auto flex items-center justify-center">
+                <Leaf className="w-7 h-7 text-[#4A6B50]" />
+              </div>
+              <h1 className="font-serif text-3xl font-bold text-[#1C281E]">Page Not Found</h1>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                The botanical page or product you're looking for could not be found or may have moved.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <Link
+                  href="/"
+                  className="px-6 py-2.5 bg-[#2C3B2E] text-white text-xs font-bold rounded-full hover:bg-[#1E2B20] transition-colors"
+                >
+                  Return to Home
+                </Link>
+                <Link
+                  href="/products"
+                  className="px-6 py-2.5 bg-white text-[#2C3B2E] border border-[#2C3B2E] text-xs font-bold rounded-full hover:bg-[#FAF8F5] transition-colors flex items-center gap-1.5"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Browse Catalog</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
-      {/* Footer */}
+      {/* Footer with Real URLs */}
       <Footer onNavigate={handleNavigate} />
 
       {/* Global Modals & Drawers */}
@@ -129,10 +195,10 @@ export default function App() {
       />
 
       <QuickViewModal
-        product={quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
+        product={modalProduct}
+        onClose={handleCloseProduct}
         onAddToCart={handleAddToCart}
-        onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        onNavigate={(p) => handleNavigate(p)}
       />
 
       <CartDrawer
@@ -141,9 +207,17 @@ export default function App() {
         items={cart}
         onUpdateQty={handleUpdateCartQty}
         onRemoveItem={handleRemoveCartItem}
-        onNavigate={(page) => { setActivePage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        onNavigate={(p) => handleNavigate(p)}
       />
 
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <RouterProvider>
+      <AppContent />
+    </RouterProvider>
   );
 }

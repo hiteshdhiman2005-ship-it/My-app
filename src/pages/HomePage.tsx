@@ -9,6 +9,7 @@ import { TransformationSlider } from '../components/TransformationSlider';
 import { SocialProof } from '../components/SocialProof';
 import { Product, PageType } from '../types';
 import { ArrowRight, BookOpen, Wrench } from 'lucide-react';
+import { Link } from '../context/RouterContext';
 
 interface HomePageProps {
   onNavigate: (page: PageType) => void;
@@ -72,7 +73,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             <p className="text-xs text-gray-300 leading-relaxed">
               Need custom 12ft trees for a hotel lobby or a tailored consultation for your home? Explore our white-glove botanical design and leasing services.
             </p>
-            <button
+            <Link
+              href="/services"
               onClick={() => {
                 onNavigate('services');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -81,7 +83,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             >
               <span>Explore Styling Services</span>
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           {/* Blog Box */}
@@ -93,7 +95,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             <p className="text-xs text-gray-300 leading-relaxed">
               Read expert tips on branch shaping, pairing leaf textures, pet-safe plant alternatives, and biophilic lighting design.
             </p>
-            <button
+            <Link
+              href="/blog"
               onClick={() => {
                 onNavigate('blog');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -102,7 +105,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             >
               <span>Read Journal Articles</span>
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
         </div>

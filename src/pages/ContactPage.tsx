@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle, ChevronDown, ChevronUp, MessageSquare, ShieldCheck, Sparkles, Truck, RotateCcw, HeartHandshake, ShoppingBag, Wrench, BookOpen, ArrowRight } from 'lucide-react';
 import { PageType } from '../types';
+import { Link } from '../context/RouterContext';
 
 interface ContactPageProps {
   onNavigate?: (page: PageType) => void;
@@ -362,29 +363,32 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <button
-                onClick={() => onNavigate('products')}
+              <Link
+                href="/products"
+                onClick={() => onNavigate && onNavigate('products')}
                 className="px-6 py-3.5 bg-[#4A6B50] hover:bg-[#3B5542] text-white text-xs font-bold rounded-full transition-colors cursor-pointer inline-flex items-center gap-2 shadow-sm"
               >
                 <ShoppingBag className="w-4 h-4 text-emerald-200" />
                 <span>Browse Plant Catalog</span>
-              </button>
+              </Link>
 
-              <button
-                onClick={() => onNavigate('services')}
+              <Link
+                href="/services"
+                onClick={() => onNavigate && onNavigate('services')}
                 className="px-6 py-3.5 bg-[#263628] hover:bg-[#324734] text-white border border-[#3A4E3D] text-xs font-bold rounded-full transition-colors cursor-pointer inline-flex items-center gap-2 shadow-sm"
               >
                 <Wrench className="w-4 h-4 text-emerald-300" />
                 <span>Explore Design Services</span>
-              </button>
+              </Link>
 
-              <button
-                onClick={() => onNavigate('blog')}
+              <Link
+                href="/blog"
+                onClick={() => onNavigate && onNavigate('blog')}
                 className="px-6 py-3.5 bg-[#263628] hover:bg-[#324734] text-white border border-[#3A4E3D] text-xs font-bold rounded-full transition-colors cursor-pointer inline-flex items-center gap-2 shadow-sm"
               >
                 <BookOpen className="w-4 h-4 text-emerald-300" />
                 <span>Read Botanical Journal</span>
-              </button>
+              </Link>
             </div>
           </div>
         )}

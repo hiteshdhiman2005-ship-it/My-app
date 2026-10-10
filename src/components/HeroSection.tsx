@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles, ShieldCheck, CheckCircle, Eye } from 'lucide-reac
 import { HERO_COPY } from '../data/copywritingContent';
 import { ImageCarousel, CarouselSlide } from './ImageCarousel';
 import { PageType } from '../types';
+import { Link } from '../context/RouterContext';
 
 interface HeroSectionProps {
   isInspectorMode: boolean;
@@ -126,13 +127,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <div className={`flex flex-col sm:flex-row gap-4 items-stretch sm:items-center ${
                 isInspectorMode ? 'outline-2 outline-dashed outline-emerald-500 bg-emerald-50/50 p-2 rounded-lg' : ''
               }`}>
-                <button
+                <Link
+                  href="/products"
                   onClick={onScrollToCategories}
                   className="px-8 py-4 bg-[#4A6B50] hover:bg-[#3B5542] text-[#FAF8F5] font-semibold text-base rounded-full transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 group cursor-pointer"
                 >
                   <span>{HERO_COPY.primaryCta}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </Link>
 
                 <button
                   onClick={onOpenQuiz}

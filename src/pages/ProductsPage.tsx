@@ -3,6 +3,7 @@ import { PRODUCTS } from '../data/products';
 import { Product, PageType } from '../types';
 import { Search, ShoppingBag, Eye, Star, ShieldCheck, Check, Sparkles, Wrench, BookOpen, HelpCircle, ArrowRight, X } from 'lucide-react';
 import { ZoomImage } from '../components/ZoomImage';
+import { Link, useRouter } from '../context/RouterContext';
 
 interface ProductsPageProps {
   onAddToCart: (product: Product) => void;
@@ -81,6 +82,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
   initialSpace = 'all',
   initialCategory = 'all'
 }) => {
+  const { navigate } = useRouter();
   const [selectedSpace, setSelectedSpace] = useState<string>(initialSpace);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -105,6 +107,33 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
     { id: 'vines', label: 'Hanging Vines' },
     { id: 'accent', label: 'Medium Plants' },
   ];
+
+  const updateUrlFilters = (space: string, category: string) => {
+    const params = new URLSearchParams();
+    if (space && space !== 'all') params.set('space', space);
+    if (category && category !== 'all') params.set('category', category);
+    const qs = params.toString();
+    navigate(qs ? `/products?${qs}` : '/products', { replace: true, scrollToTop: false });
+  };
+
+  const handleSpaceChange = (spaceId: string) => {
+    setSelectedSpace(spaceId);
+    updateUrlFilters(spaceId, selectedCategory);
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    updateUrlFilters(selectedSpace, categoryId);
+  };
+
+  const handleResetFilters = () => {
+    setSelectedSpace('all');
+    setSelectedCategory('all');
+    setSearchQuery('');
+    setPetSafeOnly(false);
+    setBestSellersOnly(false);
+    navigate('/products', { replace: true, scrollToTop: false });
+  };
 
   const currentSpaceMeta = useMemo(() => {
     return SPACES.find((s) => s.id === selectedSpace) || SPACES[0];
@@ -158,14 +187,6 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
     setTimeout(() => setAddedProductId(null), 1800);
   };
 
-  const handleResetFilters = () => {
-    setSelectedSpace('all');
-    setSelectedCategory('all');
-    setSearchQuery('');
-    setPetSafeOnly(false);
-    setBestSellersOnly(false);
-  };
-
   return (
     <div className="bg-[#FAF8F5] min-h-screen pb-24">
       {/* Catalog Hero Banner */}
@@ -198,7 +219,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
               </span>
               {selectedSpace !== 'all' && (
                 <button
-                  onClick={() => setSelectedSpace('all')}
+                  onClick={() => handleSpaceChange('all')}
                   className="text-xs text-gray-500 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -213,7 +234,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                 return (
                   <button
                     key={space.id}
-                    onClick={() => setSelectedSpace(space.id)}
+                    onClick={() => handleSpaceChange(space.id)}
                     className={`px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border ${
                       isActive
                         ? 'bg-[#2C3B2E] text-white border-[#2C3B2E] shadow-sm font-semibold'
@@ -297,7 +318,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
             {categories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => handleCategoryChange(cat.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                   selectedCategory === cat.id
                     ? 'bg-[#2C3B2E] text-white'
@@ -311,7 +332,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
 
         </div>
 
-        {/* Dedicated Space Editorial Banner (Shows when a specific space or room is chosen) */}
+        {/* Dedicated Space Editorial Banner */}
         {selectedSpace !== 'all' && (
           <div className="bg-gradient-to-br from-[#2F4232] to-[#1E2B20] text-white p-6 sm:p-7 rounded-2xl shadow-sm border border-[#4A6B50] mb-8 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -325,7 +346,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                 </h2>
               </div>
               <button
-                onClick={() => setSelectedSpace('all')}
+                onClick={() => handleSpaceChange('all')}
                 className="self-start sm:self-auto px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-xs font-medium rounded-full text-white transition-colors cursor-pointer"
               >
                 Clear Space Filter
@@ -386,14 +407,23 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                   key={product.id}
                   className="bg-white rounded-2xl overflow-hidden border border-[#EAE5DC] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group"
                 >
-                  {/* Image Container with Magnifying Zoom */}
+                  {/* Image Container with Magnifying Zoom and Link */}
                   <div className="relative aspect-4/5 overflow-hidden bg-[#FAF8F5]">
-                    <ZoomImage
-                      src={product.image}
-                      alt={product.imageAlt || product.name}
-                      containerClassName="w-full h-full"
-                      zoomScale={2.0}
-                    />
+                    <Link
+                      href={`/products/${product.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenQuickView(product);
+                      }}
+                      className="block w-full h-full"
+                    >
+                      <ZoomImage
+                        src={product.image}
+                        alt={product.imageAlt || product.name}
+                        containerClassName="w-full h-full"
+                        zoomScale={2.0}
+                      />
+                    </Link>
 
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-1 items-start z-10 pointer-events-none">
@@ -409,14 +439,18 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                       )}
                     </div>
 
-                    {/* Quick View Button */}
-                    <button
-                      onClick={() => onOpenQuickView(product)}
-                      className="absolute bottom-3 right-3 bg-white/90 hover:bg-white text-[#1C281E] p-2 rounded-full shadow-md backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110 cursor-pointer z-20"
+                    {/* Quick View Button with Direct URL */}
+                    <Link
+                      href={`/products/${product.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenQuickView(product);
+                      }}
+                      className="absolute bottom-3 right-3 bg-white/90 hover:bg-white text-[#1C281E] p-2 rounded-full shadow-md backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110 cursor-pointer z-20 flex items-center justify-center"
                       title="Quick View Details"
                     >
                       <Eye className="w-4 h-4" />
-                    </button>
+                    </Link>
                   </div>
 
                   {/* Content Area */}
@@ -427,9 +461,16 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
                         <span>{product.height}</span>
                       </div>
 
-                      <h3 className="font-serif text-lg font-bold text-[#1C281E] group-hover:text-[#2C3B2E] transition-colors">
+                      <Link
+                        href={`/products/${product.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onOpenQuickView(product);
+                        }}
+                        className="font-serif text-lg font-bold text-[#1C281E] group-hover:text-[#2C3B2E] transition-colors block"
+                      >
                         {product.name}
-                      </h3>
+                      </Link>
 
                       {/* Rating */}
                       <div className="flex items-center gap-1 mt-1 text-xs text-amber-500">
@@ -499,72 +540,73 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
           </div>
         )}
 
-        {/* Cross-Page Internal Navigation Banner */}
-        {onNavigate && (
-          <div className="mt-16 pt-12 border-t border-[#EAE5DC] grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Link to Services */}
-            <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs hover:border-[#2C3B2E] transition-all space-y-3 flex flex-col justify-between">
-              <div className="space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
-                  <Wrench className="w-5 h-5" />
-                </div>
-                <h4 className="font-serif text-lg font-bold text-[#1C281E]">Commercial & Custom Styling</h4>
-                <p className="text-xs text-[#5C6E5E] leading-relaxed">
-                  Need large 12ft trees for a lobby or custom potting for your office space? Explore our white-glove styling services.
-                </p>
+        {/* Cross-Page Internal Navigation Banner with Real URLs */}
+        <div className="mt-16 pt-12 border-t border-[#EAE5DC] grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Link to Services */}
+          <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs hover:border-[#2C3B2E] transition-all space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                <Wrench className="w-5 h-5" />
               </div>
-              <button
-                onClick={() => onNavigate('services')}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2C3B2E] hover:text-emerald-800 cursor-pointer pt-2"
-              >
-                <span>Explore Design Services</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <h4 className="font-serif text-lg font-bold text-[#1C281E]">Commercial & Custom Styling</h4>
+              <p className="text-xs text-[#5C6E5E] leading-relaxed">
+                Need large 12ft trees for a lobby or custom potting for your office space? Explore our white-glove styling services.
+              </p>
             </div>
-
-            {/* Link to Blog */}
-            <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs hover:border-[#2C3B2E] transition-all space-y-3 flex flex-col justify-between">
-              <div className="space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <h4 className="font-serif text-lg font-bold text-[#1C281E]">Plant Styling & Care Guides</h4>
-                <p className="text-xs text-[#5C6E5E] leading-relaxed">
-                  Learn branch shaping techniques, bathroom moisture styling, and pet-safe botanical arrangement ideas in our journal.
-                </p>
-              </div>
-              <button
-                onClick={() => onNavigate('blog')}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2C3B2E] hover:text-emerald-800 cursor-pointer pt-2"
-              >
-                <span>Read Design Journal</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Link to Contact Support */}
-            <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs hover:border-[#2C3B2E] transition-all space-y-3 flex flex-col justify-between">
-              <div className="space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center">
-                  <HelpCircle className="w-5 h-5" />
-                </div>
-                <h4 className="font-serif text-lg font-bold text-[#1C281E]">Have Questions Before Buying?</h4>
-                <p className="text-xs text-[#5C6E5E] leading-relaxed">
-                  Our plant experts are available 7 days a week to answer questions regarding leaf textures, planters, and room placement.
-                </p>
-              </div>
-              <button
-                onClick={() => onNavigate('contact')}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2C3B2E] hover:text-emerald-800 cursor-pointer pt-2"
-              >
-                <span>Contact Customer Support</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
+            <Link
+              href="/services"
+              onClick={() => onNavigate && onNavigate('services')}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2C3B2E] hover:text-emerald-800 cursor-pointer pt-2"
+            >
+              <span>Explore Design Services</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        )}
+
+          {/* Link to Blog */}
+          <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs hover:border-[#2C3B2E] transition-all space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <h4 className="font-serif text-lg font-bold text-[#1C281E]">Plant Styling & Care Guides</h4>
+              <p className="text-xs text-[#5C6E5E] leading-relaxed">
+                Learn branch shaping techniques, bathroom moisture styling, and pet-safe botanical arrangement ideas in our journal.
+              </p>
+            </div>
+            <Link
+              href="/blog"
+              onClick={() => onNavigate && onNavigate('blog')}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2C3B2E] hover:text-emerald-800 cursor-pointer pt-2"
+            >
+              <span>Read Design Journal</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Link to Contact Support */}
+          <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs hover:border-[#2C3B2E] transition-all space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center">
+                <HelpCircle className="w-5 h-5" />
+              </div>
+              <h4 className="font-serif text-lg font-bold text-[#1C281E]">Have Questions Before Buying?</h4>
+              <p className="text-xs text-[#5C6E5E] leading-relaxed">
+                Our plant experts are available 7 days a week to answer questions regarding leaf textures, planters, and room placement.
+              </p>
+            </div>
+            <Link
+              href="/contact"
+              onClick={() => onNavigate && onNavigate('contact')}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2C3B2E] hover:text-emerald-800 cursor-pointer pt-2"
+            >
+              <span>Contact Customer Support</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+        </div>
 
       </div>
     </div>

@@ -1,23 +1,41 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BLOG_POSTS } from '../data/blogData';
 import { BlogPost, Product, PageType } from '../types';
 import { Search, BookOpen, Clock, Calendar, User, ArrowRight, X, Share2, Check, ShoppingBag, Wrench, Mail } from 'lucide-react';
+import { Link, useRouter } from '../context/RouterContext';
 
 interface BlogPageProps {
   onNavigate?: (page: PageType) => void;
   onAddToCart?: (product: Product) => void;
   onOpenQuickView?: (product: Product) => void;
+  initialSlug?: string | null;
 }
 
 export const BlogPage: React.FC<BlogPageProps> = ({
   onNavigate,
   onAddToCart,
   onOpenQuickView,
+  initialSlug,
 }) => {
+  const { navigate } = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activePost, setActivePost] = useState<BlogPost | null>(null);
+  const [activePost, setActivePost] = useState<BlogPost | null>(() => {
+    if (initialSlug) {
+      return BLOG_POSTS.find((p) => p.slug === initialSlug || p.id === initialSlug) || null;
+    }
+    return null;
+  });
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (initialSlug) {
+      const match = BLOG_POSTS.find((p) => p.slug === initialSlug || p.id === initialSlug);
+      if (match) setActivePost(match);
+    } else {
+      setActivePost(null);
+    }
+  }, [initialSlug]);
 
   const categories = ['All', 'Interior Design', 'Plant Care', 'Trend Report', 'Pet Friendly'];
 
@@ -39,6 +57,16 @@ export const BlogPage: React.FC<BlogPageProps> = ({
   const featuredPost = useMemo(() => {
     return BLOG_POSTS.find((p) => p.featured) || BLOG_POSTS[0];
   }, []);
+
+  const handleOpenPost = (post: BlogPost) => {
+    setActivePost(post);
+    navigate(`/blog/${post.slug}`, { scrollToTop: false });
+  };
+
+  const handleClosePost = () => {
+    setActivePost(null);
+    navigate('/blog', { replace: true, scrollToTop: false });
+  };
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen pb-24">
@@ -63,7 +91,14 @@ export const BlogPage: React.FC<BlogPageProps> = ({
         {/* Featured Post Banner */}
         {featuredPost && !searchQuery && selectedCategory === 'All' && (
           <div className="bg-white rounded-3xl overflow-hidden border border-[#EAE5DC] shadow-md hover:shadow-xl transition-all duration-300 grid grid-cols-1 lg:grid-cols-12 gap-0">
-            <div className="lg:col-span-7 relative h-72 sm:h-96 lg:h-auto overflow-hidden">
+            <Link
+              href={`/blog/${featuredPost.slug}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleOpenPost(featuredPost);
+              }}
+              className="lg:col-span-7 relative h-72 sm:h-96 lg:h-auto overflow-hidden block"
+            >
               <img
                 src={featuredPost.image}
                 alt={featuredPost.imageAlt || featuredPost.title}
@@ -73,7 +108,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               <div className="absolute top-4 left-4 bg-[#2C3B2E] text-white text-xs font-bold px-3 py-1 rounded-md shadow-md uppercase tracking-wider">
                 Featured Article
               </div>
-            </div>
+            </Link>
 
             <div className="lg:col-span-5 p-8 lg:p-10 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
@@ -85,9 +120,16 @@ export const BlogPage: React.FC<BlogPageProps> = ({
                   <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {featuredPost.readTime}</span>
                 </div>
 
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1C281E] leading-tight">
+                <Link
+                  href={`/blog/${featuredPost.slug}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenPost(featuredPost);
+                  }}
+                  className="font-serif text-2xl sm:text-3xl font-bold text-[#1C281E] hover:text-[#4A6B50] transition-colors leading-tight block"
+                >
                   {featuredPost.title}
-                </h2>
+                </Link>
 
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   {featuredPost.excerpt}
@@ -102,59 +144,61 @@ export const BlogPage: React.FC<BlogPageProps> = ({
                     className="w-9 h-9 rounded-full object-cover"
                   />
                   <div>
-                    <p className="text-xs font-bold text-[#1C281E]">{featuredPost.author.name}</p>
-                    <p className="text-[11px] text-gray-500">{featuredPost.author.role}</p>
+                    <p className="text-xs font-bold text-gray-800">{featuredPost.author.name}</p>
+                    <p className="text-[11px] text-gray-400">{featuredPost.author.role}</p>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setActivePost(featuredPost)}
-                  className="px-4 py-2 bg-[#2C3B2E] text-white text-xs font-semibold rounded-full hover:bg-[#1E2B20] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                <Link
+                  href={`/blog/${featuredPost.slug}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenPost(featuredPost);
+                  }}
+                  className="px-4 py-2 bg-[#2C3B2E] hover:bg-[#1E2B20] text-white text-xs font-bold rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
                 >
                   <span>Read Article</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                </Link>
               </div>
-
             </div>
           </div>
         )}
 
-        {/* Filter Controls Bar */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-[#EAE5DC] flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-[#2C3B2E] text-white shadow-xs'
-                    : 'bg-[#FAF8F5] text-[#3D4A3E] hover:bg-[#EAE5DC]'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+        {/* Filter and Search Bar */}
+        <div className="bg-white p-6 rounded-2xl border border-[#EAE5DC] shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#2C3B2E] text-white shadow-xs font-semibold'
+                      : 'bg-[#FAF8F5] text-gray-600 hover:bg-[#EAE5DC]'
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Search Box */}
           <div className="relative w-full md:w-72">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search articles..."
+              placeholder="Search botanical guides..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-xs bg-[#FAF8F5] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C3B2E] text-[#1C281E]"
+              className="w-full pl-10 pr-4 py-2 bg-[#FAF8F5] border border-[#EAE5DC] rounded-full text-xs focus:outline-none focus:border-[#2C3B2E] transition-colors"
             />
           </div>
-
         </div>
 
-        {/* Article Cards Grid */}
+        {/* Articles Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post) => (
             <article
@@ -162,7 +206,14 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               className="bg-white rounded-2xl overflow-hidden border border-[#EAE5DC] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
             >
               <div>
-                <div className="relative h-48 overflow-hidden bg-[#FAF8F5]">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenPost(post);
+                  }}
+                  className="relative h-48 overflow-hidden bg-[#FAF8F5] block"
+                >
                   <img
                     src={post.image}
                     alt={post.imageAlt || post.title}
@@ -172,7 +223,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
                   <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[#2C3B2E] text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
                     {post.category}
                   </div>
-                </div>
+                </Link>
 
                 <div className="p-6 space-y-3">
                   <div className="flex items-center gap-2 text-[11px] text-[#5C6E5E]">
@@ -181,9 +232,16 @@ export const BlogPage: React.FC<BlogPageProps> = ({
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {post.readTime}</span>
                   </div>
 
-                  <h3 className="font-serif text-xl font-bold text-[#1C281E] group-hover:text-[#2C3B2E] transition-colors leading-snug">
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleOpenPost(post);
+                    }}
+                    className="font-serif text-xl font-bold text-[#1C281E] group-hover:text-[#2C3B2E] transition-colors leading-snug block"
+                  >
                     {post.title}
-                  </h3>
+                  </Link>
 
                   <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
                     {post.excerpt}
@@ -201,57 +259,62 @@ export const BlogPage: React.FC<BlogPageProps> = ({
                   <span className="text-xs font-semibold text-gray-700">{post.author.name}</span>
                 </div>
 
-                <button
-                  onClick={() => setActivePost(post)}
+                <Link
+                  href={`/blog/${post.slug}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenPost(post);
+                  }}
                   className="text-xs font-bold text-[#2C3B2E] hover:text-emerald-700 flex items-center gap-1 cursor-pointer"
                 >
                   <span>Read Article</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                </Link>
               </div>
 
             </article>
           ))}
         </div>
 
-        {/* Cross-Link Navigation Banner */}
-        {onNavigate && (
-          <div className="bg-[#EAE5DC] p-8 sm:p-10 rounded-3xl border border-[#DCD3C5] text-center space-y-4 mt-12">
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1C281E]">
-              Inspired by Our Botanical Design Articles?
-            </h2>
-            <p className="text-xs sm:text-sm text-[#4A524B] max-w-xl mx-auto">
-              Bring these design concepts to life in your living room or office with our Real-Touch™ artificial plants and custom styling services.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <button
-                onClick={() => onNavigate('products')}
-                className="px-6 py-3 bg-[#2C3B2E] text-white text-xs font-semibold rounded-full hover:bg-[#1E2B20] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
-              >
-                <ShoppingBag className="w-4 h-4 text-emerald-200" />
-                <span>Shop Botanical Collection</span>
-              </button>
-              <button
-                onClick={() => onNavigate('services')}
-                className="px-6 py-3 bg-white text-[#2C3B2E] border border-[#C2B8A8] text-xs font-semibold rounded-full hover:bg-[#FAF8F5] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
-              >
-                <Wrench className="w-4 h-4 text-[#4A6B50]" />
-                <span>Explore Plant Styling Services</span>
-              </button>
-              <button
-                onClick={() => onNavigate('contact')}
-                className="px-6 py-3 bg-white text-[#2C3B2E] border border-[#C2B8A8] text-xs font-semibold rounded-full hover:bg-[#FAF8F5] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
-              >
-                <Mail className="w-4 h-4 text-[#4A6B50]" />
-                <span>Contact Design Team</span>
-              </button>
-            </div>
+        {/* Cross-Link Navigation Banner with Real URLs */}
+        <div className="bg-[#EAE5DC] p-8 sm:p-10 rounded-3xl border border-[#DCD3C5] text-center space-y-4 mt-12">
+          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1C281E]">
+            Inspired by Our Botanical Design Articles?
+          </h2>
+          <p className="text-xs sm:text-sm text-[#4A524B] max-w-xl mx-auto">
+            Bring these design concepts to life in your living room or office with our Real-Touch™ artificial plants and custom styling services.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              href="/products"
+              onClick={() => onNavigate && onNavigate('products')}
+              className="px-6 py-3 bg-[#2C3B2E] text-white text-xs font-semibold rounded-full hover:bg-[#1E2B20] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
+            >
+              <ShoppingBag className="w-4 h-4 text-emerald-200" />
+              <span>Shop Botanical Collection</span>
+            </Link>
+            <Link
+              href="/services"
+              onClick={() => onNavigate && onNavigate('services')}
+              className="px-6 py-3 bg-white text-[#2C3B2E] border border-[#C2B8A8] text-xs font-semibold rounded-full hover:bg-[#FAF8F5] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
+            >
+              <Wrench className="w-4 h-4 text-[#4A6B50]" />
+              <span>Explore Plant Styling Services</span>
+            </Link>
+            <Link
+              href="/contact"
+              onClick={() => onNavigate && onNavigate('contact')}
+              className="px-6 py-3 bg-white text-[#2C3B2E] border border-[#C2B8A8] text-xs font-semibold rounded-full hover:bg-[#FAF8F5] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
+            >
+              <Mail className="w-4 h-4 text-[#4A6B50]" />
+              <span>Contact Design Team</span>
+            </Link>
           </div>
-        )}
+        </div>
 
       </div>
 
-      {/* Article Reader Modal */}
+      {/* Article Reader Modal with Direct URL */}
       {activePost && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-3xl w-full my-8 relative shadow-2xl overflow-hidden animate-fadeIn max-h-[90vh] flex flex-col">
@@ -265,7 +328,8 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
+                    const articleUrl = `${window.location.origin}/blog/${activePost.slug}`;
+                    navigator.clipboard.writeText(articleUrl);
                     setCopiedLink(true);
                     setTimeout(() => setCopiedLink(false), 2000);
                   }}
@@ -276,8 +340,9 @@ export const BlogPage: React.FC<BlogPageProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActivePost(null)}
+                  onClick={handleClosePost}
                   className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                  aria-label="Close article"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -334,26 +399,28 @@ export const BlogPage: React.FC<BlogPageProps> = ({
                 <p className="font-serif text-xl font-bold text-[#1C281E]">Ready to Transform Your Living Space?</p>
                 <p className="text-xs text-gray-600">Explore our Real-Touch™ botanicals or schedule a consultation with our interior styling team.</p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  <button
+                  <Link
+                    href="/products"
                     onClick={() => {
-                      setActivePost(null);
+                      handleClosePost();
                       if (onNavigate) onNavigate('products');
                     }}
                     className="px-6 py-2.5 bg-[#2C3B2E] text-white text-xs font-semibold rounded-full hover:bg-[#1E2B20] transition-colors cursor-pointer inline-flex items-center gap-1.5"
                   >
                     <ShoppingBag className="w-3.5 h-3.5 text-emerald-200" />
                     <span>Browse Plant Collection</span>
-                  </button>
-                  <button
+                  </Link>
+                  <Link
+                    href="/services"
                     onClick={() => {
-                      setActivePost(null);
+                      handleClosePost();
                       if (onNavigate) onNavigate('services');
                     }}
                     className="px-6 py-2.5 bg-white text-[#2C3B2E] border border-[#2C3B2E] text-xs font-semibold rounded-full hover:bg-[#EAE5DC] transition-colors cursor-pointer inline-flex items-center gap-1.5"
                   >
                     <Wrench className="w-3.5 h-3.5 text-[#2C3B2E]" />
                     <span>Explore Styling Services</span>
-                  </button>
+                  </Link>
                 </div>
               </div>
 

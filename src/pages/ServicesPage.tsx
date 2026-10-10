@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SERVICES } from '../data/servicesData';
 import { Service, PageType } from '../types';
 import { Wrench, CheckCircle2, ArrowRight, Calendar, Building, Home, Package, RefreshCw, Send, Check, ShoppingBag, BookOpen, Mail } from 'lucide-react';
+import { Link } from '../context/RouterContext';
 
 interface ServicesPageProps {
   onNavigate?: (page: PageType) => void;
@@ -150,21 +151,23 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
 
             {onNavigate && (
               <>
-                <button
+                <Link
+                  href="/products"
                   onClick={() => onNavigate('products')}
                   className="px-6 py-3.5 bg-white text-[#2C3B2E] border border-[#C2B8A8] text-xs font-semibold rounded-full hover:bg-[#FAF8F5] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
                 >
                   <ShoppingBag className="w-4 h-4 text-[#4A6B50]" />
                   <span>Browse Ready-to-Ship Products</span>
-                </button>
+                </Link>
 
-                <button
+                <Link
+                  href="/blog"
                   onClick={() => onNavigate('blog')}
                   className="px-6 py-3.5 bg-white text-[#2C3B2E] border border-[#C2B8A8] text-xs font-semibold rounded-full hover:bg-[#FAF8F5] transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
                 >
                   <BookOpen className="w-4 h-4 text-[#4A6B50]" />
                   <span>Read Styling Case Studies</span>
-                </button>
+                </Link>
               </>
             )}
           </div>

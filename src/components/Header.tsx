@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Search, ShieldCheck, Menu, X, ArrowRight, Leaf } from 'lucide-react';
 import { PageType } from '../types';
+import { Link } from '../context/RouterContext';
 
 interface HeaderProps {
   activePage: PageType;
@@ -19,18 +20,17 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems: { id: PageType; label: string }[] = [
-    { id: 'home', label: 'Home' },
-    { id: 'products', label: 'Products' },
-    { id: 'services', label: 'Services' },
-    { id: 'blog', label: 'Blog' },
-    { id: 'contact', label: 'Contact' },
+  const navItems: { id: PageType; label: string; href: string }[] = [
+    { id: 'home', label: 'Home', href: '/' },
+    { id: 'products', label: 'Products', href: '/products' },
+    { id: 'services', label: 'Services', href: '/services' },
+    { id: 'blog', label: 'Blog', href: '/blog' },
+    { id: 'contact', label: 'Contact', href: '/contact' },
   ];
 
   const handleNavClick = (page: PageType) => {
     onNavigate(page);
     setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -61,8 +61,9 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main Header Row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
         
-        {/* Brand Logo */}
-        <button 
+        {/* Brand Logo with Real URL */}
+        <Link 
+          href="/"
           onClick={() => handleNavClick('home')}
           className="flex items-center gap-3 text-left cursor-pointer group"
         >
@@ -77,15 +78,16 @@ export const Header: React.FC<HeaderProps> = ({
               Artificial Plants for Home
             </span>
           </div>
-        </button>
+        </Link>
 
-        {/* Desktop Navigation Links */}
+        {/* Desktop Navigation Links with Real URLs */}
         <nav className="hidden md:flex items-center gap-1 lg:gap-2">
           {navItems.map((item) => {
             const isActive = activePage === item.id;
             return (
-              <button
+              <Link
                 key={item.id}
+                href={item.href}
                 onClick={() => handleNavClick(item.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
                   isActive
@@ -94,20 +96,21 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 {item.label}
-              </button>
+              </Link>
             );
           })}
         </nav>
 
         {/* Right Actions */}
         <div className="flex items-center gap-3">
-          <button
+          <Link
+            href="/products"
             onClick={() => handleNavClick('products')}
             className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-[#3B5542] hover:text-[#202D22] bg-[#E2EFE4] hover:bg-[#C7DFC9] px-3.5 py-2 rounded-full transition-colors cursor-pointer"
           >
             <Search className="w-3.5 h-3.5" />
             <span>Catalog</span>
-          </button>
+          </Link>
 
           {/* Cart Button */}
           <button
@@ -135,15 +138,16 @@ export const Header: React.FC<HeaderProps> = ({
 
       </div>
 
-      {/* Mobile Drawer Navigation */}
+      {/* Mobile Drawer Navigation with Real URLs */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#FAF8F5] border-b border-[#E8E2D8] px-6 py-6 space-y-3 animate-fadeIn">
           <p className="text-xs font-bold uppercase tracking-widest text-[#6B756E] mb-2">Navigation</p>
           {navItems.map((item) => {
             const isActive = activePage === item.id;
             return (
-              <button
+              <Link
                 key={item.id}
+                href={item.href}
                 onClick={() => handleNavClick(item.id)}
                 className={`w-full text-left px-4 py-3 rounded-xl text-base font-medium flex items-center justify-between cursor-pointer transition-colors ${
                   isActive
@@ -153,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <span>{item.label}</span>
                 <ArrowRight className={`w-4 h-4 ${isActive ? 'text-emerald-200' : 'text-gray-400'}`} />
-              </button>
+              </Link>
             );
           })}
         </div>

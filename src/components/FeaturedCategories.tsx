@@ -4,6 +4,7 @@ import { CATEGORIES_COPY } from '../data/copywritingContent';
 import { PRODUCTS } from '../data/products';
 import { Product, PageType } from '../types';
 import { ZoomImage } from './ZoomImage';
+import { Link } from '../context/RouterContext';
 
 interface FeaturedCategoriesProps {
   isInspectorMode: boolean;
@@ -156,16 +157,13 @@ export const FeaturedCategories: React.FC<FeaturedCategoriesProps> = ({
                 className="bg-white rounded-2xl overflow-hidden border border-[#EAE5DC] shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
               >
                 {/* Product Image & Badges */}
-                <div 
-                  onClick={() => {
-                    if (onNavigate) {
-                      onNavigate('products');
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    } else {
-                      onOpenQuickView(product);
-                    }
+                <Link
+                  href={`/products/${product.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onOpenQuickView(product);
                   }}
-                  className="relative h-64 overflow-hidden bg-[#FAF8F5] cursor-pointer"
+                  className="relative h-64 overflow-hidden bg-[#FAF8F5] cursor-pointer block"
                   title="Click picture to go to Product Page"
                 >
                   <ZoomImage
@@ -192,6 +190,7 @@ export const FeaturedCategories: React.FC<FeaturedCategoriesProps> = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         onOpenQuickView(product);
                       }}
                       className="px-4 py-2 bg-white/95 hover:bg-white text-[#1C281E] text-xs font-semibold rounded-full shadow-md backdrop-blur-xs flex items-center gap-1.5 transition-transform hover:scale-105 cursor-pointer pointer-events-auto"
@@ -199,7 +198,7 @@ export const FeaturedCategories: React.FC<FeaturedCategoriesProps> = ({
                       <Eye className="w-3.5 h-3.5" /> Quick View
                     </button>
                   </div>
-                </div>
+                </Link>
 
                 {/* Product Info */}
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
@@ -209,20 +208,17 @@ export const FeaturedCategories: React.FC<FeaturedCategoriesProps> = ({
                       <span className="font-semibold text-gray-700">{product.height}</span>
                     </div>
 
-                    <h4
-                      onClick={() => {
-                        if (onNavigate) {
-                          onNavigate('products');
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        } else {
-                          onOpenQuickView(product);
-                        }
+                    <Link
+                      href={`/products/${product.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenQuickView(product);
                       }}
-                      className="font-serif text-lg font-bold text-[#1C281E] group-hover:text-[#2C3B2E] transition-colors cursor-pointer line-clamp-1"
+                      className="font-serif text-lg font-bold text-[#1C281E] group-hover:text-[#2C3B2E] transition-colors cursor-pointer line-clamp-1 block"
                       title="Click to go to Product Page"
                     >
                       {product.name}
-                    </h4>
+                    </Link>
 
                     {/* Rating & Reviews */}
                     <div className="flex items-center gap-1.5 mt-1">
@@ -268,13 +264,14 @@ export const FeaturedCategories: React.FC<FeaturedCategoriesProps> = ({
           {/* View Full Catalog Button */}
           {onNavigate && (
             <div className="text-center pt-8">
-              <button
+              <Link
+                href="/products"
                 onClick={() => onNavigate('products')}
                 className="px-8 py-3.5 bg-[#2C3B2E] text-white hover:bg-[#1E2B20] text-xs font-bold rounded-full transition-colors inline-flex items-center gap-2 shadow-md cursor-pointer"
               >
                 <span>View Full Botanical Catalog ({PRODUCTS.length} Items)</span>
                 <ArrowRight className="w-4 h-4 text-emerald-200" />
-              </button>
+              </Link>
             </div>
           )}
         </div>

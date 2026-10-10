@@ -1,32 +1,33 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Truck, RotateCcw, Check, Leaf } from 'lucide-react';
 import { PageType } from '../types';
+import { Link } from '../context/RouterContext';
 
 interface FooterProps {
   onNavigate: (page: PageType, options?: { space?: string; category?: string }) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
-  const [subscribed, setSubscribed] = useState(false);
   const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (email.trim()) {
       setSubscribed(true);
+      setEmail('');
     }
   };
 
   const navTo = (page: PageType, options?: { space?: string; category?: string }) => {
     onNavigate(page, options);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer className="bg-[#2F4232] text-[#FAF8F5] pt-16 pb-12 border-t border-[#4A6B50]">
+    <footer className="bg-[#2C3B2E] text-white pt-16 pb-8 border-t border-[#3D5542]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
-        {/* Guarantee Strip */}
+        {/* Value Guarantees Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12 border-b border-[#3D5542] text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3">
             <Truck className="w-8 h-8 text-emerald-300" />
@@ -58,7 +59,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           
           {/* Brand Info */}
           <div className="space-y-3">
-            <button 
+            <Link 
+              href="/"
               onClick={() => navTo('home')} 
               className="text-left flex items-center gap-2.5 group cursor-pointer"
             >
@@ -68,67 +70,83 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <span className="font-serif text-2xl font-bold tracking-tight text-white">
                 Planti<span className="text-emerald-300 font-sans font-semibold">qa</span>
               </span>
-            </button>
+            </Link>
             <p className="text-xs text-gray-300 leading-relaxed">
               Real-Touch™ artificial plants for home. Handcrafted foliage with natural wood trunks, zero watering, and non-toxic materials.
             </p>
           </div>
 
-          {/* Quick Page Links */}
+          {/* Quick Page Links with Real URLs */}
           <div className="space-y-2 text-xs">
             <h4 className="font-bold text-emerald-300 uppercase tracking-wider">Explore Pages</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <button onClick={() => navTo('home')} className="hover:text-white transition-colors cursor-pointer">
+                <Link href="/" onClick={() => navTo('home')} className="hover:text-white transition-colors cursor-pointer">
                   Home Page
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navTo('products')} className="hover:text-white transition-colors cursor-pointer">
+                <Link href="/products" onClick={() => navTo('products')} className="hover:text-white transition-colors cursor-pointer">
                   Product Catalog
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navTo('services')} className="hover:text-white transition-colors cursor-pointer">
+                <Link href="/services" onClick={() => navTo('services')} className="hover:text-white transition-colors cursor-pointer">
                   Design Services
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navTo('blog')} className="hover:text-white transition-colors cursor-pointer">
+                <Link href="/blog" onClick={() => navTo('blog')} className="hover:text-white transition-colors cursor-pointer">
                   Botanical Blog
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
+                <Link href="/contact" onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
                   Contact Us
-                </button>
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Botanical Collections */}
+          {/* Botanical Collections with Real URLs */}
           <div className="space-y-2 text-xs">
             <h4 className="font-bold text-emerald-300 uppercase tracking-wider">Featured Collections</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <button onClick={() => navTo('products', { category: 'statement' })} className="hover:text-white transition-colors cursor-pointer">
+                <Link 
+                  href="/products?category=statement" 
+                  onClick={() => navTo('products', { category: 'statement' })} 
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
                   Statement Floor Trees
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navTo('products', { category: 'succulents' })} className="hover:text-white transition-colors cursor-pointer">
+                <Link 
+                  href="/products?category=succulents" 
+                  onClick={() => navTo('products', { category: 'succulents' })} 
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
                   Desktop & Shelf Succulents
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navTo('products', { category: 'vines' })} className="hover:text-white transition-colors cursor-pointer">
+                <Link 
+                  href="/products?category=vines" 
+                  onClick={() => navTo('products', { category: 'vines' })} 
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
                   Cascading Hanging Vines
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navTo('products', { category: 'stands' })} className="hover:text-white transition-colors cursor-pointer">
+                <Link 
+                  href="/products?category=stands" 
+                  onClick={() => navTo('products', { category: 'stands' })} 
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
                   Architectural Plant Stands
-                </button>
+                </Link>
               </li>
             </ul>
           </div>
@@ -167,7 +185,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         </div>
 
-        {/* Curated Space Solutions & Styling Guides */}
+        {/* Curated Space Solutions & Styling Guides with Real URLs */}
         <div className="pt-8 border-t border-[#3D5542] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h4 className="font-serif font-bold text-sm text-emerald-300">
@@ -179,9 +197,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-            <button
+            <Link
+              href="/products?space=living-room"
               onClick={() => navTo('products', { space: 'living-room' })}
-              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer block"
             >
               <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
                 <span>🛋️</span>
@@ -190,11 +209,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <p className="text-[11px] text-gray-300 leading-snug">
                 Tall statement trees & stands proportioned to fill empty corners.
               </p>
-            </button>
+            </Link>
 
-            <button
+            <Link
+              href="/products?space=bathroom"
               onClick={() => navTo('products', { space: 'bathroom' })}
-              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer block"
             >
               <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
                 <span>🛁</span>
@@ -203,11 +223,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <p className="text-[11px] text-gray-300 leading-snug">
                 Steam-resistant cascading vines & compact shelf succulents.
               </p>
-            </button>
+            </Link>
 
-            <button
+            <Link
+              href="/products?space=office"
               onClick={() => navTo('products', { space: 'office' })}
-              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer block"
             >
               <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
                 <span>💼</span>
@@ -216,11 +237,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <p className="text-[11px] text-gray-300 leading-snug">
                 Biophilic tabletop greenery that looks completely real on desks.
               </p>
-            </button>
+            </Link>
 
-            <button
+            <Link
+              href="/products?space=dark-rooms"
               onClick={() => navTo('products', { space: 'dark-rooms' })}
-              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer block"
             >
               <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
                 <span>🌑</span>
@@ -229,11 +251,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <p className="text-[11px] text-gray-300 leading-snug">
                 Zero-light tolerant greenery for basement suites and dim corridors.
               </p>
-            </button>
+            </Link>
 
-            <button
+            <Link
+              href="/products?space=pet-safe"
               onClick={() => navTo('products', { space: 'pet-safe' })}
-              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer"
+              className="p-3.5 bg-[#3D5542]/70 hover:bg-[#3D5542] border border-[#5D8264]/60 hover:border-emerald-400/60 rounded-xl text-left transition-all group cursor-pointer block"
             >
               <div className="flex items-center gap-2 text-emerald-300 font-semibold mb-1 group-hover:text-white">
                 <span>🐾</span>
@@ -242,25 +265,25 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <p className="text-[11px] text-gray-300 leading-snug">
                 Certified 100% non-toxic foliage safe for curious cats and dogs.
               </p>
-            </button>
+            </Link>
           </div>
         </div>
 
-        {/* Copyright & SEO Links */}
+        {/* Copyright & SEO Links with Real URLs */}
         <div className="pt-6 border-t border-[#3D5542] text-center text-xs text-gray-300 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Plantiqa Artificial Plants for Home. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
-            <button onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
+            <Link href="/contact" onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
               Privacy Policy
-            </button>
+            </Link>
             <span>•</span>
-            <button onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
+            <Link href="/contact" onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
               Terms of Service
-            </button>
+            </Link>
             <span>•</span>
-            <button onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
+            <Link href="/contact" onClick={() => navTo('contact')} className="hover:text-white transition-colors cursor-pointer">
               Support
-            </button>
+            </Link>
             <span>•</span>
             <a 
               href="/sitemap.xml" 

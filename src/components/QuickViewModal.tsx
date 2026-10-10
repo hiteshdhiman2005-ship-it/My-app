@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Star, ShieldCheck, ShoppingBag, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Star, ShieldCheck, ShoppingBag, ArrowRight, Share2, Check } from 'lucide-react';
 import { Product, PageType } from '../types';
 import { ImageCarousel, CarouselSlide } from './ImageCarousel';
 
@@ -16,6 +16,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   onAddToCart,
   onNavigate,
 }) => {
+  const [copied, setCopied] = useState(false);
+
   if (!product) return null;
 
   const gallerySlides: CarouselSlide[] = (product.gallery && product.gallery.length > 0)
@@ -27,18 +29,38 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
       }))
     : [{ id: product.id, url: product.image, alt: product.imageAlt || `${product.name} - ${product.categoryLabel}`, badge: product.badge }];
 
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/products/${product.id}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 relative shadow-2xl space-y-6 animate-fadeIn overflow-hidden max-h-[90vh] overflow-y-auto">
         
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer z-30"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Top Control Buttons */}
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-30">
+          <button
+            onClick={handleCopyLink}
+            className="text-xs text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Copy Direct Product URL"
+          >
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5" />}
+            <span>{copied ? 'URL Copied!' : 'Share Product'}</span>
+          </button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+            aria-label="Close product view"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start pt-4 sm:pt-0">
           
           {/* Left Column: Image Carousel with Thumbnails */}
           <div className="w-full">
