@@ -60,6 +60,22 @@ Generate high-converting homepage hero headline, key bullet points, and SEO meta
       appType: 'spa',
     });
     app.use(vite.middlewares);
+
+    // Fallback explicitly to index.html with vite HTML transformation for any unmatched GET route
+    app.get('*', async (req, res, next) => {
+      if (req.method !== 'GET') return next();
+      const url = req.originalUrl;
+      try {
+        const fs = await import('fs');
+        const indexPath = path.join(process.cwd(), 'index.html');
+        let template = fs.readFileSync(indexPath, 'utf-8');
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (e: any) {
+        vite.ssrFixStacktrace(e);
+        next(e);
+      }
+    });
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
